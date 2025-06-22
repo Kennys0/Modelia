@@ -1,0 +1,23 @@
+# Ignorar el entorno virtual de Python
+/env/
+
+# Ignorar los modelos de IA descargados
+/models/
+*.bin
+*.pth
+*.safetensors
+
+# Ignorar archivos de caché de Python
+__pycache__/
+*.pyc
+
+# Ignorar cachés de la aplicación
+gradio_cache/
+*.log
+*.png
+*.obj
+*.mtl
+
+# Ignorar el ejecutable de Blender
+/blender-*/
+blender.exe 

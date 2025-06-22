@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Puzzles 3D</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Generador de Puzzles 3D a partir de una Imagen</h1>
+    </header>
+    <main>
+        <div id="controls">
+            <input type="text" id="prompt-input" placeholder="Describe la imagen para el puzzle 3D" style="width: 60%; margin-bottom: 1em;">
+            <button id="generate-btn">Generar Modelo de Puzzle</button>
+            <button id="reprocess-btn">Reprocesar Último Modelo (Rápido)</button>
+            <p id="status">Presiona un botón para iniciar el proceso.</p>
+        </div>
+        <div id="viewer-container">
+            <!-- El visor 3D de Three.js se insertará aquí -->
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <!-- Importamos la librería Three.js desde un CDN -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.164.1/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.164.1/examples/jsm/"
+            }
+        }
+    </script>
+    <script type="module" src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html> 
