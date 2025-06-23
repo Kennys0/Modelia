@@ -649,7 +649,7 @@ def run_slicer(model_filepath):
             all_pieces = []
 
     # --- Definir ruta de exportación ---
-    workspace_dir = os.path.dirname(os.path.abspath(__file__))
+        workspace_dir = os.path.dirname(os.path.abspath(__file__))
     base_name = os.path.splitext(os.path.basename(model_filepath))[0]
     output_filename = f"{base_name}_Joined.obj"
     output_obj_filepath = os.path.join(workspace_dir, output_filename)
