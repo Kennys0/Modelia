@@ -395,8 +395,8 @@ def run_slicer(model_filepath):
             original_model = bpy.context.active_object
             base_name = os.path.splitext(os.path.basename(model_filepath))[0]
             original_model.name = base_name
-            original_model.rotation_euler=(0,0,0)
-            bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
+            # original_model.rotation_euler=(0,0,0)
+            # bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
         else:
             print("ERROR: No se pudo importar.")
             return
@@ -649,7 +649,7 @@ def run_slicer(model_filepath):
             all_pieces = []
 
     # --- Definir ruta de exportación ---
-        workspace_dir = os.path.dirname(os.path.abspath(__file__))
+    workspace_dir = os.path.dirname(os.path.abspath(__file__))
     base_name = os.path.splitext(os.path.basename(model_filepath))[0]
     output_filename = f"{base_name}_Joined.obj"
     output_obj_filepath = os.path.join(workspace_dir, output_filename)
@@ -658,6 +658,12 @@ def run_slicer(model_filepath):
     if all_pieces and all_pieces[0].name in bpy.data.objects:
         print(f"Exportando objeto final a: {output_obj_filepath}")
         export_objects_to_obj(all_pieces, output_obj_filepath)
+
+        # Rotar 90 grados en X para que se vea "parado" en la interfaz
+        final_object = all_pieces[0]
+        final_object.rotation_euler = (math.radians(90), 0, 0)
+        bpy.context.view_layer.objects.active = final_object
+        bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
     else:
         print("ERROR: No se pudo exportar. No quedan piezas válidas.")
 

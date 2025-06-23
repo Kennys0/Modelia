@@ -1,8 +1,11 @@
 Argumento de ruta de modelo recibido: D:\Ifurniture\IA nueva\hunyuan3d2_local\generated_model_clean.obj
 Creando ranuras en intersecciones reales...
-Proceso completado antes de limpieza: 22 piezas con ranuras.
-Piezas restantes tras eliminar flotantes: 22
+Proceso completado antes de limpieza: 25 piezas con ranuras.
+Piezas restantes tras eliminar flotantes: 25
 Limpiando geometría de las piezas finales para eliminar artefactos...
+Info: Removed: 0 vertices, 0 edges, 0 faces
+Info: Removed: 0 vertices, 0 edges, 0 faces
+Info: Removed: 0 vertices, 0 edges, 0 faces
 Info: Removed: 0 vertices, 0 edges, 0 faces
 Info: Removed: 0 vertices, 0 edges, 0 faces
 Info: Removed: 0 vertices, 0 edges, 0 faces
@@ -28,6 +31,6 @@ Info: Removed: 0 vertices, 0 edges, 0 faces
 Uniendo todas las piezas en un solo objeto...
 Exportando objeto final a: D:\Ifurniture\IA nueva\hunyuan3d2_local\generated_model_clean_Joined.obj
 Blender 4.4.3 (hash 802179c51ccc built 2025-04-29 15:39:58)
-OBJ import of 'generated_model_clean.obj' took 39.60 ms
+OBJ import of 'generated_model_clean.obj' took 31.21 ms
 
 Blender quit

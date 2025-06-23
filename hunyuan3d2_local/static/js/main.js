@@ -54,7 +54,7 @@ function initViewer(modelUrl) {
 
     const fillLight = new THREE.DirectionalLight(0xffffff, 0.2);
     fillLight.position.set(-5, -5, -5);
-    scene.add(fillLight);
+    scene.add(fillLight); 
 
     // 6. Cargar el material (.mtl) y luego el modelo (.obj)
     const mtlLoader = new MTLLoader();
@@ -101,6 +101,11 @@ function initViewer(modelUrl) {
                 cleanGroup.add(meshClone);
             }
         });
+
+        // Rotar el grupo 90 grados en X y 180 grados en Z para que el modelo mire al frente
+        cleanGroup.rotation.x = Math.PI / 2;
+        cleanGroup.rotation.y = Math.PI;
+        cleanGroup.rotation.z = Math.PI;
 
         const box = new THREE.Box3().setFromObject(cleanGroup);
         const center = box.getCenter(new THREE.Vector3());

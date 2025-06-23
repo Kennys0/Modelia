@@ -3,6 +3,7 @@ from PIL import Image
 from hy3dgen.shapegen import Hunyuan3DDiTFlowMatchingPipeline, FloaterRemover
 import torch
 import os
+from hy3dgen.rembg import BackgroundRemover
 
 print("Iniciando demo (versión mini)...")
 
@@ -32,6 +33,11 @@ print("Pipeline movido a CPU.")
 input_image_path = args.input_image if args.input_image else "D:/perry.png"
 image = Image.open(input_image_path).convert("RGBA")
 print(f"Imagen cargada: {input_image_path}")
+
+print("Eliminando fondo de la imagen...")
+remover = BackgroundRemover()
+image = remover(image)
+print("Fondo eliminado.")
 
 # Genera el mesh 3D (ajusta los parámetros según tu PC)
 print("Generando mesh (mini, calidad media)...")

@@ -4,13 +4,7 @@ import sys
 import shutil
 import time
 from flask import Flask, render_template, jsonify, url_for, Response, request
-
-# --- SOLO PARA COLAB: ngrok ---
-try:
-    from pyngrok import ngrok
-    USE_NGROK = True
-except ImportError:
-    USE_NGROK = False
+# from pyngrok import ngrok  # Comentado para uso local
 
 # --- CONFIGURACIÓN DE LA APLICACIÓN FLASK ---
 app = Flask(__name__)
@@ -21,7 +15,7 @@ app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 # --- CONFIGURACIÓN DE RUTAS DEL PROYECTO ---
 WORKSPACE_DIR = os.path.dirname(os.path.abspath(__file__))
 # CORRECCIÓN: Apuntar al ejecutable de Blender en el entorno de Colab
-BLENDER_EXECUTABLE = "/usr/bin/blender.exe"
+BLENDER_EXECUTABLE = "D:/blender.exe"
 # Restaurar el script principal
 BLENDER_SCRIPT = os.path.join(WORKSPACE_DIR, "test_outline_extraction.py") 
 BLENDER_LOG_FILE = os.path.join(WORKSPACE_DIR, "blender_log.txt") 
@@ -29,7 +23,7 @@ BLENDER_LOG_FILE = os.path.join(WORKSPACE_DIR, "blender_log.txt")
 # CORRECCIÓN: Apuntar a la subcarpeta donde Hunyuan realmente guarda el modelo
 HUNYUAN_DIR = os.path.join(WORKSPACE_DIR, "hunyuan3d2")
 HUNYUAN_SCRIPT = os.path.join(HUNYUAN_DIR, "minimal_demo.py")
-BASE_MODEL_NAME = "tigre_mini_clean.obj"
+BASE_MODEL_NAME = "perry_clean.obj"
 BASE_MODEL_PATH = os.path.join(HUNYUAN_DIR, BASE_MODEL_NAME)  # Ruta corregida
 
 STATIC_MODELS_DIR = os.path.join(WORKSPACE_DIR, "static", "models")
@@ -227,10 +221,10 @@ def reprocess_last():
 
 
 if __name__ == '__main__':
-    # SOLO PARA COLAB: ngrok
-    if USE_NGROK:
-        public_url = ngrok.connect(5000)
-        print(f" * URL pública de ngrok: {public_url}")
+    # Comentado para uso local sin ngrok
+    public_url = ngrok.connect(5000)
+    print(f" * URL pública de ngrok: {public_url}")
+    
     print("🚀 Iniciando aplicación Flask localmente...")
     print("📱 Accede a: http://localhost:5000")
     print("💡 Para hacer público, instala pyngrok: pip install pyngrok")
