@@ -15,7 +15,7 @@ app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 # --- CONFIGURACIÓN DE RUTAS DEL PROYECTO ---
 WORKSPACE_DIR = os.path.dirname(os.path.abspath(__file__))
 # CORRECCIÓN: Apuntar al ejecutable de Blender en el entorno de Colab
-BLENDER_EXECUTABLE = "D:/blender.exe"
+BLENDER_EXECUTABLE = "blender"
 # Restaurar el script principal
 BLENDER_SCRIPT = os.path.join(WORKSPACE_DIR, "test_outline_extraction.py") 
 BLENDER_LOG_FILE = os.path.join(WORKSPACE_DIR, "blender_log.txt") 

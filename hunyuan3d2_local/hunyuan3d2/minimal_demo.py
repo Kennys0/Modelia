@@ -30,7 +30,7 @@ pipeline.to("cpu", torch.float32)
 print("Pipeline movido a CPU.")
 
 # Carga la imagen de entrada
-input_image_path = args.input_image if args.input_image else "D:/perry.png"
+input_image_path = args.input_image if args.input_image else "input_image.png"  # Ruta relativa para Colab/Kaggle
 image = Image.open(input_image_path).convert("RGBA")
 print(f"Imagen cargada: {input_image_path}")
 
@@ -45,7 +45,7 @@ mesh = pipeline(image=image, num_inference_steps=15, octree_resolution=120)[0]
 print("Mesh generado.")
 
 # Determina la ruta de salida
-output_obj_path = args.output_obj if args.output_obj else "perry.obj"
+output_obj_path = args.output_obj if args.output_obj else "modelo_generado.obj"  # Ruta relativa para Colab/Kaggle
 
 print(f"Exportando solo geometría 3D a {output_obj_path}...")
 mesh.export(output_obj_path)
