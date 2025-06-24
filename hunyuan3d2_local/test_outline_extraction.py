@@ -13,8 +13,8 @@ USE_FILE_IMPORT = True      # Opción 3: Importa un modelo desde un archivo.
 
 # --- PARÁMETROS ---
 # N_x = 4  # Número de cortes en X  # Eliminado, ahora se calcula automáticamente
-N_y = 10  # Número de cortes en Y (predeterminado)
-N_x = 7  # Se calculará automáticamente
+N_y = 11  # Número de cortes en Y (predeterminado)
+N_x = 8  # Se calculará automáticamente
 material_thickness_mm = 3.0  # Grosor del material (mm)
 clearance_mm = 0.05          # Holgura para encastre (mm)
 slot_margin_mm = 0.05        # Margen para no cortar el centro

@@ -5,20 +5,151 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Generador de Puzzles 3D</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .input-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            background-color: #f9f9f9;
+        }
+        
+        .input-section h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        
+        .input-toggle {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .toggle-btn {
+            padding: 10px 20px;
+            border: 2px solid #007bff;
+            background: white;
+            color: #007bff;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .toggle-btn.active {
+            background: #007bff;
+            color: white;
+        }
+        
+        .input-content {
+            display: none;
+        }
+        
+        .input-content.active {
+            display: block;
+        }
+        
+        .image-upload {
+            border: 2px dashed #ccc;
+            padding: 20px;
+            text-align: center;
+            border-radius: 10px;
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+        
+        .image-upload:hover {
+            border-color: #007bff;
+        }
+        
+        .image-upload input[type="file"] {
+            display: none;
+        }
+        
+        .preview-image {
+            max-width: 200px;
+            max-height: 200px;
+            margin-top: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+        
+        .generate-btn {
+            background: #28a745;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        
+        .generate-btn:hover {
+            background: #218838;
+        }
+        
+        .generate-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+    </style>
 </head>
 <body>
     <header>
-        <h1>Generador de Puzzles 3D a partir de un Texto</h1>
+        <h1>Generador de Puzzles 3D</h1>
+        <p>Genera modelos 3D desde texto o imagen</p>
     </header>
+    
     <main>
         <div id="controls">
-            <input type="text" id="prompt-input" placeholder="Describe la imagen para el puzzle 3D" style="width: 60%; margin-bottom: 1em;">
-            <button id="generate-btn">Generar Modelo de Puzzle</button>
-            <button id="reprocess-btn">Reprocesar Último Modelo (Rápido)</button>
-            <p id="status">Presiona un botón para iniciar el proceso.</p>
+            <!-- Selector de método de entrada -->
+            <div class="input-toggle">
+                <button class="toggle-btn active" onclick="switchInput('text')">📝 Generar desde Texto</button>
+                <button class="toggle-btn" onclick="switchInput('image')">🖼️ Generar desde Imagen</button>
+            </div>
+            
+            <!-- Sección de entrada por texto -->
+            <div id="text-input" class="input-section input-content active">
+                <h3>Generar desde Descripción</h3>
+                <input type="text" id="prompt-input" placeholder="Describe la imagen para el puzzle 3D (ej: un conejo 3D, estilo cartoon)" style="width: 60%; margin-bottom: 1em;">
+                <button id="generate-text-btn" class="generate-btn">Generar desde Texto</button>
+            </div>
+            
+            <!-- Sección de entrada por imagen -->
+            <div id="image-input" class="input-section input-content">
+                <h3>Generar desde Imagen</h3>
+                <div class="image-upload" onclick="document.getElementById('image-file').click()">
+                    <p>📁 Haz clic para seleccionar una imagen</p>
+                    <p style="font-size: 12px; color: #666;">Formatos soportados: JPG, PNG, GIF</p>
+                    <input type="file" id="image-file" accept="image/*" onchange="previewImage(this)">
+                    <img id="image-preview" class="preview-image" alt="Vista previa">
+                </div>
+                <button id="generate-image-btn" class="generate-btn" disabled>Generar desde Imagen</button>
+            </div>
+            
+            <!-- Botón de reprocesamiento -->
+            <div style="margin-top: 20px;">
+                <button id="reprocess-btn" class="generate-btn" style="background: #ffc107; color: #333;">🔄 Reprocesar Último Modelo (Rápido)</button>
+            </div>
+            
+            <p id="status">Selecciona un método de entrada para comenzar.</p>
         </div>
+        
         <div id="viewer-container">
             <!-- El visor 3D de Three.js se insertará aquí -->
+        </div>
+        
+        <!-- Botones para modelos de resultados -->
+        <div id="model-buttons" class="input-section">
+            <h3>Modelos Exportados</h3>
+            <button class="generate-btn" onclick="loadModel('Pinguino2.obj')">Pinguino2</button>
+            <button class="generate-btn" onclick="loadModel('cocodrilo.obj')">Cocodrilo</button>
+            <button class="generate-btn" onclick="loadModel('Alpakita.obj')">Alpakita</button>
+            <button class="generate-btn" onclick="loadModel('Pinguino1.obj')">Pinguino1</button>
+            <button class="generate-btn" onclick="loadModel('conejo_result.obj')">Conejo</button>
+            <button class="generate-btn" onclick="loadModel('tigre_result.obj')">Tigre</button>
+            <button class="generate-btn" onclick="loadModel('gato.obj')">Gato</button>
         </div>
     </main>
 
@@ -33,5 +164,57 @@
         }
     </script>
     <script type="module" src="{{ url_for('static', filename='js/main.js') }}"></script>
+    
+    <script>
+        // Funciones para manejar la interfaz
+        function switchInput(type) {
+            // Actualizar botones
+            document.querySelectorAll('.toggle-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Mostrar/ocultar secciones
+            document.querySelectorAll('.input-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(type + '-input').classList.add('active');
+            
+            // Actualizar estado
+            document.getElementById('status').textContent = type === 'text' ? 
+                'Escribe una descripción para generar el modelo 3D.' : 
+                'Selecciona una imagen para generar el modelo 3D.';
+        }
+        
+        function previewImage(input) {
+            const file = input.files[0];
+            const preview = document.getElementById('image-preview');
+            const generateBtn = document.getElementById('generate-image-btn');
+            
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                    generateBtn.disabled = false;
+                    document.getElementById('status').textContent = 'Imagen cargada. Haz clic en "Generar desde Imagen" para continuar.';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+        
+        // --- Cargar modelo OBJ desde resultados ---
+        function loadModel(filename) {
+            // Asume que los modelos están en /static/models_resultados/ (debes copiar los .obj ahí o servirlos por Flask)
+            const modelUrl = `/static/models_resultados/${filename}`;
+            // Suponiendo que main.js expone una función global para cargar modelos:
+            if (window.loadObjModel) {
+                window.loadObjModel(modelUrl);
+            } else {
+                alert('No se encontró la función para cargar modelos.');
+            }
+        }
+        
+        // Hacer las funciones disponibles globalmente
+        window.switchInput = switchInput;
+        window.previewImage = previewImage;
+        window.loadModel = loadModel;
+    </script>
 </body>
 </html> 

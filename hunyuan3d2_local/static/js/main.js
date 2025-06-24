@@ -4,11 +4,13 @@ import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 import { MTLLoader } from 'three/addons/loaders/MTLLoader.js';
 
 // --- ELEMENTOS DEL DOM ---
-const generateBtn = document.getElementById('generate-btn');
+const generateTextBtn = document.getElementById('generate-text-btn');
+const generateImageBtn = document.getElementById('generate-image-btn');
 const reprocessBtn = document.getElementById('reprocess-btn');
 const statusText = document.getElementById('status');
 const viewerContainer = document.getElementById('viewer-container');
 const promptInput = document.getElementById('prompt-input');
+const imageFileInput = document.getElementById('image-file');
 
 // --- ESTADO DE LA APP ---
 let scene, camera, renderer, controls;
@@ -144,13 +146,13 @@ function initViewer(modelUrl) {
     });
 }
 
-
 // --- LÓGICA DE LA INTERACCIÓN ---
 
 // Función auxiliar para manejar las peticiones y la UI
-async function handleProcessRequest(endpoint, processType) {
+async function handleProcessRequest(endpoint, processType, formData = null) {
     // Deshabilitar botones y mostrar estado de carga
-    generateBtn.disabled = true;
+    generateTextBtn.disabled = true;
+    generateImageBtn.disabled = true;
     reprocessBtn.disabled = true;
     statusText.textContent = `Iniciando ${processType}... Esto puede tardar.`;
     viewerContainer.classList.add('loader');
@@ -158,19 +160,28 @@ async function handleProcessRequest(endpoint, processType) {
 
     try {
         let response;
-        // Si hay un prompt, enviarlo como parte del FormData
-        const prompt = promptInput ? promptInput.value.trim() : '';
-        if (prompt) {
-            const formData = new FormData();
-            formData.append('prompt', prompt);
+        
+        if (formData) {
+            // Si hay FormData (para imagen), enviarlo directamente
             response = await fetch(endpoint, {
                 method: 'POST',
                 body: formData
             });
         } else {
-            response = await fetch(endpoint, {
-                method: 'POST',
-            });
+            // Si hay un prompt, enviarlo como parte del FormData
+            const prompt = promptInput ? promptInput.value.trim() : '';
+            if (prompt) {
+                const promptFormData = new FormData();
+                promptFormData.append('prompt', prompt);
+                response = await fetch(endpoint, {
+                    method: 'POST',
+                    body: promptFormData
+                });
+            } else {
+                response = await fetch(endpoint, {
+                    method: 'POST',
+                });
+            }
         }
 
         const data = await response.json();
@@ -198,21 +209,54 @@ async function handleProcessRequest(endpoint, processType) {
             document.getElementById('log-details').textContent = logText;
         } catch (logError) {
             console.error('Error al obtener el log:', logError);
-            document.getElementById('log-details').textContent = 'No se pudo cargar el log del servidor.';
+            document.getElementById('log-details').textContent = 'No se pudo cargar el log de errores.';
         }
-
-        viewerContainer.classList.remove('loader');
-        viewerContainer.innerHTML = '<p>El proceso falló. Revisa el log de arriba.</p>';
-        
-        generateBtn.disabled = false;
+    } finally {
+        // Rehabilitar botones
+        generateTextBtn.disabled = false;
+        generateImageBtn.disabled = false;
         reprocessBtn.disabled = false;
+        viewerContainer.classList.remove('loader');
     }
 }
 
-generateBtn.addEventListener('click', () => {
-    handleProcessRequest('/run-process', 'generación completa');
+// --- EVENT LISTENERS ---
+
+// Generar desde texto
+generateTextBtn.addEventListener('click', () => {
+    const prompt = promptInput.value.trim();
+    if (!prompt) {
+        statusText.textContent = 'Por favor, escribe una descripción.';
+        return;
+    }
+    handleProcessRequest('/run-process', 'generación desde texto');
 });
 
+// Generar desde imagen
+generateImageBtn.addEventListener('click', () => {
+    const file = imageFileInput.files[0];
+    if (!file) {
+        statusText.textContent = 'Por favor, selecciona una imagen.';
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('input_image', file);
+    handleProcessRequest('/run-process', 'generación desde imagen', formData);
+});
+
+// Reprocesar último modelo
 reprocessBtn.addEventListener('click', () => {
     handleProcessRequest('/reprocess-last', 'reprocesamiento');
-}); 
+});
+
+// Habilitar/deshabilitar botón de imagen según selección
+imageFileInput.addEventListener('change', () => {
+    generateImageBtn.disabled = !imageFileInput.files[0];
+});
+
+// --- Permitir cargar modelos OBJ desde botones externos ---
+window.loadObjModel = function(modelUrl) {
+    statusText.textContent = 'Cargando modelo...';
+    initViewer(modelUrl);
+}; 

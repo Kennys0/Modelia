@@ -15,7 +15,7 @@ app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 # --- CONFIGURACIÓN DE RUTAS DEL PROYECTO ---
 WORKSPACE_DIR = os.path.dirname(os.path.abspath(__file__))
 # CORRECCIÓN: Apuntar al ejecutable de Blender en el entorno de Colab
-BLENDER_EXECUTABLE = "blender"
+BLENDER_EXECUTABLE = "D:/blender.exe"
 # Restaurar el script principal
 BLENDER_SCRIPT = os.path.join(WORKSPACE_DIR, "test_outline_extraction.py") 
 BLENDER_LOG_FILE = os.path.join(WORKSPACE_DIR, "blender_log.txt") 
@@ -23,7 +23,7 @@ BLENDER_LOG_FILE = os.path.join(WORKSPACE_DIR, "blender_log.txt")
 # CORRECCIÓN: Apuntar a la subcarpeta donde Hunyuan realmente guarda el modelo
 HUNYUAN_DIR = os.path.join(WORKSPACE_DIR, "hunyuan3d2")
 HUNYUAN_SCRIPT = os.path.join(HUNYUAN_DIR, "minimal_demo.py")
-BASE_MODEL_NAME = "perry_clean.obj"
+BASE_MODEL_NAME = "Pinguino.obj"
 BASE_MODEL_PATH = os.path.join(HUNYUAN_DIR, BASE_MODEL_NAME)  # Ruta corregida
 
 STATIC_MODELS_DIR = os.path.join(WORKSPACE_DIR, "static", "models")
@@ -110,15 +110,22 @@ def generar_imagen_ia(prompt, output_path):
 def run_process():
     """Ejecuta el flujo COMPLETO: generación y procesamiento."""
 
-    # Permite recibir la ruta de la imagen desde el frontend o usar una imagen específica
-    input_image_path = request.form.get('input_image_path')
+    # Verificar si hay una imagen subida desde el frontend
+    uploaded_image = request.files.get('input_image')
     prompt = request.form.get('prompt')
     generated_obj_path = None
 
-    if input_image_path:
-        # Usar la imagen subida por el usuario
-        print(f"Usando imagen subida: {input_image_path}")
-        generated_obj_path = os.path.join(WORKSPACE_DIR, 'generated_model.obj')  # <-- Aquí se genera el modelo
+    if uploaded_image:
+        # Procesar imagen subida desde el frontend
+        print(f"Procesando imagen subida: {uploaded_image.filename}")
+        
+        # Guardar la imagen subida
+        input_image_path = os.path.join(WORKSPACE_DIR, 'uploaded_image.png')
+        uploaded_image.save(input_image_path)
+        print(f"Imagen guardada en: {input_image_path}")
+        
+        # Generar modelo 3D desde la imagen subida
+        generated_obj_path = os.path.join(WORKSPACE_DIR, 'generated_model.obj')
         minimal_demo_py = os.path.join(HUNYUAN_DIR, 'minimal_demo.py')
         env_python = os.path.join(WORKSPACE_DIR, "env", "Scripts", "python.exe")
         if not os.path.exists(env_python):
@@ -128,9 +135,10 @@ def run_process():
         try:
             subprocess.run(minimal_demo_cmd, check=True, shell=True, cwd=HUNYUAN_DIR, capture_output=True, text=True)
         except subprocess.CalledProcessError as e:
-            print(f"ERROR: La generación del modelo 3D desde imagen falló.\n--- STDOUT ---\n{e.stdout}\n--- STDERR ---\n{e.stderr}")
-            return jsonify({'success': False, 'message': 'Falló la generación del modelo 3D desde imagen.'})
-        # Aquí determinamos si existe un archivo *_clean.obj generado
+            print(f"ERROR: La generación del modelo 3D desde imagen subida falló.\n--- STDOUT ---\n{e.stdout}\n--- STDERR ---\n{e.stderr}")
+            return jsonify({'success': False, 'message': 'Falló la generación del modelo 3D desde imagen subida.'})
+        
+        # Verificar si existe un archivo *_clean.obj generado
         clean_obj_path = os.path.join(WORKSPACE_DIR, 'generated_model_clean.obj')
         if os.path.exists(clean_obj_path):
             print(f"Usando archivo clean: {clean_obj_path}")
@@ -139,12 +147,15 @@ def run_process():
         else:
             model_input_path = generated_obj_path
             output_filename_base = os.path.splitext(os.path.basename(generated_obj_path))[0]
+            
     elif prompt:
+        # Generar imagen desde prompt usando IA
         input_image_path = os.path.join(STATIC_MATERIALS_DIR, 'input_image.png')
         print(f"Generando imagen IA desde prompt: {prompt}")
         generar_imagen_ia(prompt, input_image_path)
         print(f"Imagen IA guardada en {input_image_path}")
-        # --- Generar modelo 3D desde la imagen IA ---
+        
+        # Generar modelo 3D desde la imagen IA
         generated_obj_path = os.path.join(WORKSPACE_DIR, 'generated_model.obj')
         minimal_demo_py = os.path.join(HUNYUAN_DIR, 'minimal_demo.py')
         env_python = os.path.join(WORKSPACE_DIR, "env", "Scripts", "python.exe")
@@ -157,7 +168,8 @@ def run_process():
         except subprocess.CalledProcessError as e:
             print(f"ERROR: La generación del modelo 3D desde imagen IA falló.\n--- STDOUT ---\n{e.stdout}\n--- STDERR ---\n{e.stderr}")
             return jsonify({'success': False, 'message': 'Falló la generación del modelo 3D desde imagen IA.'})
-        # Aquí determinamos si existe un archivo *_clean.obj generado
+        
+        # Verificar si existe un archivo *_clean.obj generado
         clean_obj_path = os.path.join(WORKSPACE_DIR, 'generated_model_clean.obj')
         if os.path.exists(clean_obj_path):
             print(f"Usando archivo clean: {clean_obj_path}")
@@ -167,7 +179,7 @@ def run_process():
             model_input_path = generated_obj_path
             output_filename_base = os.path.splitext(os.path.basename(generated_obj_path))[0]
     else:
-        # Por defecto, usa el modelo base (que ya debe tener la extensión _clean.obj si corresponde)
+        # Por defecto, usa el modelo base
         model_input_path = BASE_MODEL_PATH
         output_filename_base = os.path.splitext(os.path.basename(BASE_MODEL_PATH))[0]
 
@@ -222,8 +234,8 @@ def reprocess_last():
 
 if __name__ == '__main__':
     # Comentado para uso local sin ngrok
-    public_url = ngrok.connect(5000)
-    print(f" * URL pública de ngrok: {public_url}")
+    #public_url = ngrok.connect(5000)
+    #print(f" * URL pública de ngrok: {public_url}")
     
     print("🚀 Iniciando aplicación Flask localmente...")
     print("📱 Accede a: http://localhost:5000")
